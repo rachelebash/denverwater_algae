@@ -12,6 +12,6 @@ library(htmltools)
 
 ```{r echo = F, warning=F, message=F}
 
-htmltools::includeHTML("cpo.html")
+htmltools::includeHTML("algal_blooms_long.html")
 
 ```
