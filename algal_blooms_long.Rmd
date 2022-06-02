@@ -1,0 +1,344 @@
+---
+title: 'Geospatial Analysis'
+editor_options:
+  chunk_output_type: console
+output:
+  html_document:
+    df_print: paged
+    fig_caption: yes
+    toc: true
+    toc_float: true
+    theme: yeti
+  pdf_document: default
+---
+
+```{r setup data, include = FALSE}
+
+# Adapted from:
+# Keith Jennings
+# kjennings@lynker.com
+# 2021-10-25
+
+# Nayoung Hur
+# and
+# Rachel Bash
+# Report for Marston Reservoir
+
+# Load packages
+library(tidyverse)
+library(cowplot); theme_set(theme_cowplot())
+library(lubridate)
+library(RColorBrewer)
+library(knitr)
+library(kableExtra)
+library(flextable)
+library(tinytex)
+library(janitor)
+
+options(knitr.duplicate.label = "allow")
+
+# Load data ----
+
+
+# Source date functions
+devtools::source_url("https://raw.githubusercontent.com/SnowHydrology/date_functions/main/doy_dowy.R")
+
+# Define working directory
+# dir <- "~/Documents/Lynker.nosync/denverwater/" # Nayoung's directory
+source("utils/find_google_drive.R") # drive_dir
+
+
+
+##################################
+##### read in satellite data #####
+##################################
+
+year <- "2021"
+
+date1 <- "2020-04-01 to 2020-10-30"
+date2 <- "2021-04-01 to 2021-10-30"
+
+# Read csv data into R
+df <- read.csv(paste0(drive_dir, "/pts_", year, "_sentinel2_toa_may19.csv"))
+
+# Add sensor and date columns
+df <- df %>% 
+  mutate(system.index = case_when(str_sub(system.index, 1, 2) == "20" ~ 
+                                    paste0("SE02_123456_", system.index),
+                                  TRUE ~ system.index),
+         sensor = str_sub(system.index, 1, 4),
+         date = str_sub(system.index, 13, 20) %>% as.Date(format = "%Y%m%d"),
+         waterbody = paste0(str_to_title(reservoir_), " Reservoir")) %>% 
+  select(-.geo)
+
+# Remove system.index and extra QA columns
+df <- df %>% 
+  select(., -system.index, -QA60)
+
+# Add date information
+df <- df %>% 
+  mutate(year = year(date),
+         month = month(date),
+         doy = doy_FUN(date))
+
+# Export as RDS file
+df %>% 
+  saveRDS(paste0(drive_dir, "sensors_all_aggregated_", year, ".RDS"))
+
+
+# Comparison script for remote sensing output versus chl-a sampling ----
+
+# Import processed remote sensing data and chl-a data
+gee <- readRDS(paste0(drive_dir, "sensors_all_aggregated_2021.RDS"))
+# Add chl-a data as needed
+
+# add looplist
+looplist <- read.csv(paste0(drive_dir, "/rmarkdown/waterbody_list.csv")) %>%
+  clean_names()
+
+value.to.match <- looplist[1,1]
+
+# Define thresholds
+fai_thresh = 0.05
+ndwi_thresh = 0.63
+nir_red_thresh = 1
+
+```
+
+
+## Summary
+This report shows maps and time series data of potential harmful algal blooms (HAB) in several of Denver Water’s reservoirs. The reservoirs in this report were selected by Denver Water as key locations where HABs could cause increased water treatment requirements or potential public health concerns.
+
+```{r map all res, echo = FALSE, out.width = '100%'}
+# 
+knitr::include_graphics(paste0(drive_dir, "/nir_red/All Waterbodies.jpg"))
+```
+      *Map of all reservoirs in the report.*
+
+HABs may be detected through the use of remote sensing algorithms based on data from the Sentinel 2 Level 1-C Top of Atmosphere satellite. There are two key metrics shown in this report that relate to HAB presence:
+
+**NIR:Red:** the near infrared (NIR) to red band ratio. The higher NIR:Red values relate to increasing algae biomass on the water surface (Tebbs et al., 2013).The NIR:Red ratio is close to zero for clear water and increases with algae concentrations and values greater than 1 indicates algae presence (Tebbs et al., 2013). NIR:Red is calculated in equation 1 below.
+
+
+```{r nir red eq, echo = FALSE, fig.align= 'right', out.width = '100%'}
+
+knitr::include_graphics(paste0(drive_dir, "/equations/nir_red.png"))
+
+```
+
+
+where *R* represents the top of atmosphere reflectance (0–1) for a given band (e.g., $R_{NIR}$ is the reflectance value for the NIR band).
+
+**FAI-NDWI:** This algorithm uses the floating algae index (FAI) and the normalized difference water index (NDWI). This algorithm detects potential cyanobacterial blooms (Oyama et al., 2015). First, the FAI differentiates between clear water and algae using a threshold of 0.05. The FAI considers values greater than or equal to 0.05 to be algae, while those below are clear water. Next, the NDWI partitions algae (i.e., pixels with FAI ≥ 0.05) into cyanobacteria and non-cyanobacteria blooms using a threshold of 0.63. Values greater than or equal to this threshold are considered probable cyanobacterial blooms while those below are not. This algorithm is described in equations 2 and 3 below.
+
+```{r fai eq, echo = FALSE, fig.align= 'right', out.width = '100%'}
+
+knitr::include_graphics(paste0(drive_dir, "/equations/fai.png"))
+
+```
+
+```{r ndwi eq, echo = FALSE, fig.align= 'right', out.width = '100%'}
+
+knitr::include_graphics(paste0(drive_dir, "/equations/ndwi.png"))
+
+```
+
+
+Dense algae on the water surface can yield taste and odor issues, additionally cyanotoxins may be present in the water with cyanobacteria presence. So remote sensing is a valuable tool to map algal blooms and potential HABs because the data are continuous, frequent, and freely available. While remote sensing cannot determine toxicity, it offers near real time results and provides drinking water managers a tool to understand the seasonality and presence of algal blooms to assist in decision making. 
+
+## Key Results
+
+Detection points were placed in four different areas around each reservoir. Points are labeled edge, near edge, and open water to indicate the distance from shore. This is to help differentiate the satellite results during times of low water or high water.
+
+Table XX below describes results at each reservoir using the algorithms above. This table highlights data from the period XX to YY. The other tables and figures in this report show results for the entire season so far. 
+
+TABLE HERE
+
+### Antero Reservoir
+
+**ADD TEXT HERE**
+```{r include=FALSE}
+out = NULL
+
+value.to.match <- looplist[1,1] 
+out = c(out, knit_expand('waterbody_loop.Rmd'))
+
+```
+`r paste(knit(text = out), collapse = '\n')`
+
+
+### Bambei-Walker Reservoir
+
+**ADD TEXT HERE**
+```{r include=FALSE}
+out = NULL
+
+value.to.match <- looplist[2,1] 
+out = c(out, knit_expand('waterbody_loop.Rmd'))
+
+```
+`r paste(knit(text = out), collapse = '\n')`
+
+
+### Chatfield Reservoir
+
+**ADD TEXT HERE**
+```{r include=FALSE}
+out = NULL
+
+value.to.match <- looplist[3,1] 
+out = c(out, knit_expand('waterbody_loop.Rmd'))
+
+```
+`r paste(knit(text = out), collapse = '\n')`
+
+
+### Cheesman Reservoir
+
+**ADD TEXT HERE**
+```{r include=FALSE}
+out = NULL
+
+value.to.match <- looplist[4,1] 
+out = c(out, knit_expand('waterbody_loop.Rmd'))
+
+```
+`r paste(knit(text = out), collapse = '\n')`
+
+
+### Dillon Reservoir
+
+**ADD TEXT HERE**
+```{r include=FALSE}
+out = NULL
+out = NULL
+
+value.to.match <- looplist[5,1] 
+out = c(out, knit_expand('waterbody_loop.Rmd'))
+
+```
+`r paste(knit(text = out), collapse = '\n')`
+
+
+### Dunes Reservoir
+
+**ADD TEXT HERE**
+```{r include=FALSE}
+out = NULL
+
+value.to.match <- looplist[6,1] 
+out = c(out, knit_expand('waterbody_loop.Rmd'))
+
+```
+`r paste(knit(text = out), collapse = '\n')`
+
+
+### Gross Reservoir
+
+**ADD TEXT HERE**
+```{r include=FALSE}
+out = NULL
+
+value.to.match <- looplist[7,1] 
+out = c(out, knit_expand('waterbody_loop.Rmd'))
+
+```
+`r paste(knit(text = out), collapse = '\n')`
+
+
+### Marston Reservoir
+
+**ADD TEXT HERE**
+```{r include=FALSE}
+out = NULL
+
+value.to.match <- looplist[8,1] 
+out = c(out, knit_expand('waterbody_loop.Rmd'))
+
+```
+`r paste(knit(text = out), collapse = '\n')`
+
+
+### Platte Canyon Reservoir
+
+**ADD TEXT HERE**
+```{r include=FALSE}
+out = NULL
+
+value.to.match <- looplist[9,1] 
+out = c(out, knit_expand('waterbody_loop.Rmd'))
+
+```
+`r paste(knit(text = out), collapse = '\n')`
+
+
+### Ralston Reservoir
+
+**ADD TEXT HERE**
+```{r include=FALSE}
+out = NULL
+
+value.to.match <- looplist[10,1] 
+out = c(out, knit_expand('waterbody_loop.Rmd'))
+
+```
+`r paste(knit(text = out), collapse = '\n')`
+
+
+### Strontia Springs Reservoir
+
+**ADD TEXT HERE**
+```{r include=FALSE}
+out = NULL
+
+value.to.match <- looplist[11,1] 
+out = c(out, knit_expand('waterbody_loop.Rmd'))
+
+```
+`r paste(knit(text = out), collapse = '\n')`
+
+
+### Tanabe Reservoir
+
+**ADD TEXT HERE**
+```{r include=FALSE}
+out = NULL
+
+value.to.match <- looplist[12,1] 
+out = c(out, knit_expand('waterbody_loop.Rmd'))
+
+```
+`r paste(knit(text = out), collapse = '\n')`
+
+
+### Welby Reservoir
+
+**ADD TEXT HERE**
+```{r include=FALSE}
+out = NULL
+
+value.to.match <- looplist[13,1] 
+out = c(out, knit_expand('waterbody_loop.Rmd'))
+
+```
+`r paste(knit(text = out), collapse = '\n')`
+
+
+### Williams Fork Reservoir
+
+**ADD TEXT HERE** 
+```{r include=FALSE}
+out = NULL
+
+value.to.match <- looplist[14,1] 
+out = c(out, knit_expand('waterbody_loop.Rmd'))
+
+```
+`r paste(knit(text = out), collapse = '\n')`
+
+
+## References
+Oyama, Y., Matsushita, B., & Fukushima, T. (2015). Distinguishing surface cyanobacterial blooms and aquatic macrophytes using Landsat/TM and ETM+ shortwave infrared bands. *Remote Sensing of Environment*, 157, 35–47. https://doi.org/10.1016/j.rse.2014.04.031
+
+Tebbs, E. J., Remedios, J. J., & Harper, D. M. (2013). Remote sensing of chlorophyll-a as a measure of cyanobacterial biomass in Lake Bogoria, a hypertrophic, saline–alkaline, flamingo lake, using Landsat ETM+. *Remote Sensing of Environment*, 135, 92–106.
+

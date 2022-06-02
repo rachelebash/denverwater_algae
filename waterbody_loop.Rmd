@@ -1,0 +1,98 @@
+The following images are maps showing potential harmful algal blooms in {{value.to.match}} from `r date1` and `r date2`.
+
+```{r include = FALSE}
+# Filter by waterbody
+
+value.to.match <- '{{value.to.match}}' 
+
+# Import processed remote sensing data and chl-a data
+gee <- readRDS(paste0(drive_dir, "sensors_all_aggregated_2021.RDS"))
+# Add chl-a data as needed
+
+gee <- gee %>% 
+  filter(waterbody %in% value.to.match) %>%
+  select(waterbody, everything())
+
+
+#list of maps for each waterbody (some are split into two maps N and S)
+nir_paths <- Sys.glob(paste0(drive_dir, "/nir_red/*.jpg"))
+nir_paths <- nir_paths[grepl(value.to.match, nir_paths)]
+nir_paths
+
+fai_paths <- Sys.glob(paste0(drive_dir, "/fai_ndwi/*.jpg"))
+fai_paths <- fai_paths[grepl(value.to.match, fai_paths)]
+
+```
+
+
+```{r echo = FALSE, out.width = '100%'}
+
+knitr::include_graphics(nir_paths)
+
+```
+*NIR:Red mapped from `r date1` to `r date2` study period. Darker colors indicate higher NIR:Red exceedances. MON in the site name means monitor.*
+  
+  
+```{r echo = FALSE, out.width = '100%'}
+knitr::include_graphics(fai_paths)
+```
+*FAI-NDWI mapped from `r date1` to `r date2` study period. Darker colors indicate higher FAI-NDWI exceedances. MON in the site name means monitor.*
+  
+  
+  At {{value.to.match}} timeseries data is processed for 4 locations as shown in Figure 3 below. At each monitoring point, 3 different timeseries are collected at 3 sites spaced 10m apart. These additional points are intended to minimize false positive threshold exceedances since vegetation at the water’s edge can confuse both algorithms.
+
+
+```{r echo = FALSE, results = 'asis', out.width= '100%'}
+
+ggplot(gee, 
+       aes(date, nir_red_br, lty = pt_loc)) +
+  geom_line() +
+  geom_hline(yintercept = 1, color = "blue", lty = "dashed") +
+  scale_linetype_discrete(name = "Point Location", 
+                          labels = c("Edge", "Near edge", "Open water")) +
+  theme_cowplot(12) +
+  labs(x = "Date",
+       y = "NIR:Red Ratio") +
+  facet_wrap(~sampling_p, scales = "free_y")
+```
+
+NIR:Red time series from `r date1` to `r date2` study period. The blue dashed line is at NIR:Red = 1."
+
+```{r include = FALSE}
+# Count above thresholds
+gee <- gee %>% 
+  mutate(cyano = case_when(fai >= fai_thresh & ndwi >= ndwi_thresh ~ 1,
+                           TRUE ~ 0))
+
+over_thresh <- gee %>% 
+  group_by(sampling_p, pt_loc) %>% 
+  summarise(nir_red_n_over = sum(nir_red_br >= nir_red_thresh),
+            fai_ndwi_n_over = sum(cyano),
+            n_obs = n()) %>% 
+  mutate(nir_red_pct_over = nir_red_n_over / n_obs * 100,
+         fai_ndwi_pct_over = fai_ndwi_n_over / n_obs * 100) %>% 
+  rename("Point location" = "sampling_p",
+         "Type" = "pt_loc",
+         "Number of observations" = "n_obs",
+         "NIR:Red threshold exceedance" = "nir_red_n_over",
+         "FAI-NDWI threshold exceedance" = "fai_ndwi_n_over",
+         "FAI-NDWI threshold exceedance (%)" = "fai_ndwi_pct_over",
+         "NIR:Red threshold exceedance (%)" = "nir_red_pct_over") 
+```
+
+```{r echo = FALSE, results = 'asis', tab.cap = "Mapped exceedances for each point location. NIR:Red values greater than 1 indicate an exceedance and FAI-NDWI output values greater than 0.63 indicate an exceedance."}
+
+
+# Function to make table fit to page margins
+fitflextabletopage <- function(ft, pgwidth = 6){
+  ft_out <- ft %>% autofit()
+  ft_out <- width(ft_out, width = dim(ft_out)$widths*pgwidth /(flextable_dim(ft_out)$widths))
+  return(ft_out)
+}
+
+over_thresh %>%
+  flextable() %>%
+  fitflextabletopage
+
+```
+
