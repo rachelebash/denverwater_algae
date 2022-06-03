@@ -1,5 +1,7 @@
 ---
-title: 'Geospatial Analysis'
+title: |
+  ![](Lynker-Logo.png){width=1in}  
+  Geospatial Analysis
 editor_options:
   chunk_output_type: console
 output:
@@ -104,13 +106,13 @@ nir_red_thresh = 1
 
 
 ## Summary
-This report shows maps and time series data of potential harmful algal blooms (HAB) in several of Denver Water’s reservoirs. The reservoirs in this report were selected by Denver Water as key locations where HABs could cause increased water treatment requirements or potential public health concerns.
+This report shows maps and time series data of potential harmful algal blooms (HABs) in several of Denver Water’s reservoirs. The reservoirs in this report were selected by Denver Water as key locations where HABs could cause increased water treatment requirements or potential public health concerns.
 
 ```{r map all res, echo = FALSE, out.width = '100%'}
 # 
 knitr::include_graphics(paste0(drive_dir, "/nir_red/All Waterbodies.jpg"))
 ```
-      *Map of all reservoirs in the report.*
+*Map of all reservoirs in the report.*
 
 HABs may be detected through the use of remote sensing algorithms based on data from the Sentinel 2 Level 1-C Top of Atmosphere satellite. There are two key metrics shown in this report that relate to HAB presence:
 
@@ -168,13 +170,13 @@ out = c(out, knit_expand('waterbody_loop.Rmd'))
 
 **ADD TEXT HERE**
 ```{r include=FALSE}
-out = NULL
+out1 = NULL
 
 value.to.match <- looplist[2,1] 
-out = c(out, knit_expand('waterbody_loop.Rmd'))
+out1 = c(out1, knit_expand('waterbody_loop.Rmd'))
 
 ```
-`r paste(knit(text = out), collapse = '\n')`
+`r paste(knit(text = out1), collapse = '\n')`
 
 
 ### Chatfield Reservoir

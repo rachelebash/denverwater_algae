@@ -9,7 +9,7 @@ The following images are maps showing potential harmful algal blooms in {{value.
 gee <- readRDS(paste0(drive_dir, "sensors_all_aggregated_", date1, "_", date2, ".RDS"))
 # Add chl-a data as needed
 
-gee <- gee %>% 
+gee_tidy <- gee %>% 
   filter(waterbody %in% value.to.match) %>%
   select(waterbody, everything())
 
@@ -19,7 +19,7 @@ nir_paths <- Sys.glob(paste0(drive_dir, "/nir_red/d_", date1, "_", date2, "/*.jp
 nir_paths <- nir_paths[grepl(value.to.match, nir_paths)]
 nir_paths
 
-fai_paths <- Sys.glob(paste0(drive_dir, "/fai_ndwi/*.jpg"))
+fai_paths <- Sys.glob(paste0(drive_dir, "/fai_ndwi/d_", date1, "_", date2, "/*.jpg"))
 fai_paths <- fai_paths[grepl(value.to.match, fai_paths)]
 
 ```
@@ -36,15 +36,19 @@ knitr::include_graphics(nir_paths)
 ```{r echo = FALSE, out.width = '100%'}
 knitr::include_graphics(fai_paths)
 ```
-*FAI-NDWI mapped from `r date1` to `r date2` study period. Darker colors indicate higher FAI-NDWI exceedances. MON in the site name means monitor.*
+*FAI-NDWI mapped from `r date1` to `r date2` study period. Darker colors indicate higher FAI-NDWI exceedances.*
   
   
-  At {{value.to.match}} timeseries data is processed for 4 locations as shown in Figure 3 below. At each monitoring point, 3 different timeseries are collected at 3 sites spaced 10m apart. These additional points are intended to minimize false positive threshold exceedances since vegetation at the water’s edge can confuse both algorithms.
+  At {{value.to.match}} timeseries data is processed for at least four locations as shown in the figure below. At each monitoring point, three different timeseries are collected at three sites spaced 10m apart. These additional points are intended to minimize false positive threshold exceedances since vegetation at the water’s edge can confuse both algorithms. "MON" in the site name means monitor, and the additional point location names correspond to sampling point names previously used at Denver Water .
 
 
-```{r echo = FALSE, results = 'asis', out.width= '100%'}
+```{r echo = FALSE, message = FALSE, out.width= '100%', fig.cap = " '{{value.to.match}}' test"}
 
-ggplot(gee, 
+gee_plot <- gee_tidy %>% 
+  filter(waterbody %in% value.to.match) %>%
+  select(waterbody, everything())
+
+p <- ggplot(gee_plot, 
        aes(date, nir_red_br, lty = pt_loc)) +
   geom_line() +
   geom_hline(yintercept = 1, color = "blue", lty = "dashed") +
@@ -52,19 +56,31 @@ ggplot(gee,
                           labels = c("Edge", "Near edge", "Open water")) +
   theme_cowplot(12) +
   labs(x = "Date",
-       y = "NIR:Red Ratio") +
+       y = "NIR:Red Ratio", 
+       title = gee_plot$waterbody[1]) +
   facet_wrap(~sampling_p, scales = "free_y")
+
+ggsave(filename = paste0("C:/projects/dw/git/denverwater_algae/plots/", value.to.match, ".jpg"))
+
+plot_paths <- Sys.glob(paste0("C:/projects/dw/git/denverwater_algae/plots/*.jpg"))
+plot_paths <- plot_paths[grepl(value.to.match, plot_paths)]
+```
+
+``` {r echo = FALSE}
+
+knitr::include_graphics(plot_paths)
+
 ```
 
 NIR:Red time series from `r date1` to `r date2` study period. The blue dashed line is at NIR:Red = 1."
 
 ```{r include = FALSE}
 # Count above thresholds
-gee <- gee %>% 
+gee_table <- gee_tidy %>% 
   mutate(cyano = case_when(fai >= fai_thresh & ndwi >= ndwi_thresh ~ 1,
                            TRUE ~ 0))
 
-over_thresh <- gee %>% 
+over_thresh <- gee_table %>% 
   group_by(sampling_p, pt_loc) %>% 
   summarise(nir_red_n_over = sum(nir_red_br >= nir_red_thresh),
             fai_ndwi_n_over = sum(cyano),
