@@ -1,12 +1,12 @@
-The following images are maps showing potential harmful algal blooms in {{value.to.match}} from `r date1` and `r date2`.
+The following images are maps showing potential harmful algal blooms in {{value.to.match}} from `r date1` to `r date2`.
 
 ```{r include = FALSE}
 # Filter by waterbody
 
-value.to.match <- '{{value.to.match}}' 
+# value.to.match <- '{{value.to.match}}' 
 
 # Import processed remote sensing data and chl-a data
-gee <- readRDS(paste0(drive_dir, "sensors_all_aggregated_2021.RDS"))
+gee <- readRDS(paste0(drive_dir, "sensors_all_aggregated_", date1, "_", date2, ".RDS"))
 # Add chl-a data as needed
 
 gee <- gee %>% 
@@ -15,7 +15,7 @@ gee <- gee %>%
 
 
 #list of maps for each waterbody (some are split into two maps N and S)
-nir_paths <- Sys.glob(paste0(drive_dir, "/nir_red/*.jpg"))
+nir_paths <- Sys.glob(paste0(drive_dir, "/nir_red/d_", date1, "_", date2, "/*.jpg"))
 nir_paths <- nir_paths[grepl(value.to.match, nir_paths)]
 nir_paths
 
@@ -69,15 +69,20 @@ over_thresh <- gee %>%
   summarise(nir_red_n_over = sum(nir_red_br >= nir_red_thresh),
             fai_ndwi_n_over = sum(cyano),
             n_obs = n()) %>% 
-  mutate(nir_red_pct_over = nir_red_n_over / n_obs * 100,
-         fai_ndwi_pct_over = fai_ndwi_n_over / n_obs * 100) %>% 
+  ungroup() %>%
+  mutate(nir_red_pct_over = round(nir_red_n_over / n_obs * 100,1),
+         fai_ndwi_pct_over = round(fai_ndwi_n_over / n_obs * 100,1)) %>%
+  select(sampling_p, pt_loc, n_obs, nir_red_n_over, nir_red_pct_over, fai_ndwi_n_over, fai_ndwi_pct_over) %>%
+  mutate(nir_combine = paste0(nir_red_n_over, " (", nir_red_pct_over, "%)"), 
+         fai_combine = paste0(fai_ndwi_n_over, " (", fai_ndwi_pct_over, "%)"),
+         n_obs = as.character(n_obs)) %>%
+  select(sampling_p, pt_loc, n_obs, nir_combine, fai_combine) %>%
   rename("Point location" = "sampling_p",
          "Type" = "pt_loc",
          "Number of observations" = "n_obs",
-         "NIR:Red threshold exceedance" = "nir_red_n_over",
-         "FAI-NDWI threshold exceedance" = "fai_ndwi_n_over",
-         "FAI-NDWI threshold exceedance (%)" = "fai_ndwi_pct_over",
-         "NIR:Red threshold exceedance (%)" = "nir_red_pct_over") 
+         "NIR:Red exceedance count (%)" = "nir_combine",
+         "FAI-NDWI exceedance count (%)" = "fai_combine")
+  
 ```
 
 ```{r echo = FALSE, results = 'asis', tab.cap = "Mapped exceedances for each point location. NIR:Red values greater than 1 indicate an exceedance and FAI-NDWI output values greater than 0.63 indicate an exceedance."}

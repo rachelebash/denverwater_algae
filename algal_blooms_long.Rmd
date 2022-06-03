@@ -53,13 +53,13 @@ source("utils/find_google_drive.R") # drive_dir
 ##### read in satellite data #####
 ##################################
 
-year <- "2021"
+year <- "2020"
 
-date1 <- "2020-04-01 to 2020-10-30"
-date2 <- "2021-04-01 to 2021-10-30"
+date1 <- "2020-04-01"
+date2 <- "2020-11-01"
 
 # Read csv data into R
-df <- read.csv(paste0(drive_dir, "/pts_", year, "_sentinel2_toa_may19.csv"))
+df <- read.csv(paste0(drive_dir, "/pts__sentinel2_toa_", date1, "_", date2, ".csv"))
 
 # Add sensor and date columns
 df <- df %>% 
@@ -83,14 +83,11 @@ df <- df %>%
 
 # Export as RDS file
 df %>% 
-  saveRDS(paste0(drive_dir, "sensors_all_aggregated_", year, ".RDS"))
+  saveRDS(paste0(drive_dir, "sensors_all_aggregated_", date1, "_", date2, ".RDS"))
 
 
 # Comparison script for remote sensing output versus chl-a sampling ----
 
-# Import processed remote sensing data and chl-a data
-gee <- readRDS(paste0(drive_dir, "sensors_all_aggregated_2021.RDS"))
-# Add chl-a data as needed
 
 # add looplist
 looplist <- read.csv(paste0(drive_dir, "/rmarkdown/waterbody_list.csv")) %>%
