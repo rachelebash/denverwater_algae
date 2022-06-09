@@ -38,6 +38,7 @@ library(tinytex)
 library(janitor)
 
 options(knitr.duplicate.label = "allow")
+knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
 
 # Load data ----
 
@@ -57,8 +58,8 @@ source("utils/find_google_drive.R") # drive_dir
 
 year <- "2020"
 
-date1 <- "2020-04-01"
-date2 <- "2020-11-01"
+date1 <- "2022-04-01"
+date2 <- "2022-06-07"
 
 # Read csv data into R
 df <- read.csv(paste0(drive_dir, "/pts__sentinel2_toa_", date1, "_", date2, ".csv"))
@@ -121,39 +122,67 @@ HABs may be detected through the use of remote sensing algorithms based on data 
 
 ```{r nir red eq, echo = FALSE, fig.align= 'right', out.width = '100%'}
 
-knitr::include_graphics(paste0(drive_dir, "/equations/nir_red.png"))
+knitr::include_graphics(paste0(drive_dir, "/images/nir_red.png"))
 
 ```
 
 
-where *R* represents the top of atmosphere reflectance (0–1) for a given band (e.g., $R_{NIR}$ is the reflectance value for the NIR band).
+where *R* represents the top of atmosphere reflectance (0–1) for a given band.
 
 **FAI-NDWI:** This algorithm uses the floating algae index (FAI) and the normalized difference water index (NDWI). This algorithm detects potential cyanobacterial blooms (Oyama et al., 2015). First, the FAI differentiates between clear water and algae using a threshold of 0.05. The FAI considers values greater than or equal to 0.05 to be algae, while those below are clear water. Next, the NDWI partitions algae (i.e., pixels with FAI ≥ 0.05) into cyanobacteria and non-cyanobacteria blooms using a threshold of 0.63. Values greater than or equal to this threshold are considered probable cyanobacterial blooms while those below are not. This algorithm is described in equations 2 and 3 below.
 
 ```{r fai eq, echo = FALSE, fig.align= 'right', out.width = '100%'}
 
-knitr::include_graphics(paste0(drive_dir, "/equations/fai.png"))
+knitr::include_graphics(paste0(drive_dir, "/images/fai.png"))
 
 ```
 
 ```{r ndwi eq, echo = FALSE, fig.align= 'right', out.width = '100%'}
 
-knitr::include_graphics(paste0(drive_dir, "/equations/ndwi.png"))
+knitr::include_graphics(paste0(drive_dir, "/images/ndwi.png"))
 
 ```
 
 
-Dense algae on the water surface can yield taste and odor issues, additionally cyanotoxins may be present in the water with cyanobacteria presence. So remote sensing is a valuable tool to map algal blooms and potential HABs because the data are continuous, frequent, and freely available. While remote sensing cannot determine toxicity, it offers near real time results and provides drinking water managers a tool to understand the seasonality and presence of algal blooms to assist in decision making. 
+We applied the above algorithms to the Sentinel 2 data in Google Earth Engine to evaluate temporal and spatial patterns of algae presence and potential cyanobacterial blooms. With these data, we created a time series of the NIR:Red ratio and the FAI-NDWI cyanobacteria algorithm at each extraction point. In addition to the time series data, we also created maps for each waterbody showing the number of times each pixel exceeded a NIR:Red ratio greater than 1 and met the conditions for cyanobacteria according to the FAI-NDWI algorithm. 
+
+Dense algae on the water surface can yield taste and odor issues, additionally cyanotoxins may be present in the water with cyanobacteria presence. Therefore, remote sensing is a valuable tool to map algal blooms and potential HABs because the data are continuous, frequent, and freely available. While remote sensing cannot determine toxicity, it offers near real time results and provides drinking water managers a tool to understand the seasonality and presence of algal blooms to assist in decision making. 
+
+### Interpreting Results
+
+Detection points were placed in four different areas around each reservoir. Points are labeled edge, near edge, and open water to indicate the distance from shore. This is to help differentiate the satellite results during times of low water or high water. Clusters of points are labeled as MON, followed by a number, indicating which cluster of monitoring points they belong to. In addition to the monitoring points, some reservoirs have sites labeled as Chlorophyll sampling points, where previous in situ sampling of Chlorophyll-a has occurred. Maps of each studied reservoir will contain data between `r date1` and `r date2`. The figure below shows an example of a portion of reservoir with an active algal bloom occurring, according to the NIR:Red ratios. 
+
+```{r example, echo = FALSE, fig.align= 'right', out.width = '100%'}
+
+knitr::include_graphics(paste0(drive_dir, "/images/example.png"))
+
+```
+
+
+All three points in the monitoring cluster (MON-04) are in blue or dark blue bands. According to the legend, the "open water" monitoring point is in a location where NIR:Red ratio threshold has been exceeded 17-22 times within the time period. It is important to note that these remote sensing approaches are subject to important assumptions and limitations, such as waterbody size, mixed land-water pixels, and atmospheric effects (cloud cover, haze). For instance, raster data and the associated color bands located outside of the black waterbody outline may be picking up land pixels. Therefore, using and understanding both the maps and the time series data for each point can help determine whether harmful blooms are taking place in each reservoir. 
 
 ## Key Results
 
-Detection points were placed in four different areas around each reservoir. Points are labeled edge, near edge, and open water to indicate the distance from shore. This is to help differentiate the satellite results during times of low water or high water.
+
 
 Table XX below describes results at each reservoir using the algorithms above. This table highlights data from the period XX to YY. The other tables and figures in this report show results for the entire season so far. 
 
 TABLE HERE
 
 ### Antero Reservoir
+
+NIR:Red	
+
+* yes	According to the NIR:Red remote sensing data, the reservoir expressed evidence of algae growth between `r date1` and `r date2`. For each location and pixel type, the NIR:Red ratio exceeded 1 for at least several satellite overpasses.
+
+* no	According to the NIR:Red remote sensing data, the reservoir **did not** express evidence of algae growth between `r date1` and `r date2`. 
+		
+		
+FAI:NDWI	
+
+* yes	The FAI-NDWI algorithm showed potential blue-green algae growth.
+
+* no	The FAI-NDWI algorithm **did not** show potential blue-green algae growth. 
 
 **ADD TEXT HERE**
 ```{r include=FALSE}

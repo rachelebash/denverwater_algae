@@ -39,7 +39,7 @@ knitr::include_graphics(fai_paths)
 *FAI-NDWI mapped from `r date1` to `r date2` study period. Darker colors indicate higher FAI-NDWI exceedances.*
   
   
-  At {{value.to.match}} timeseries data is processed for at least four locations as shown in the figure below. At each monitoring point, three different timeseries are collected at three sites spaced 10m apart. These additional points are intended to minimize false positive threshold exceedances since vegetation at the water’s edge can confuse both algorithms. "MON" in the site name means monitor, and the additional point location names correspond to sampling point names previously used at Denver Water .
+  At {{value.to.match}}, timeseries data is processed for at least four locations as shown in the figure below. At each monitoring point, three different timeseries are collected at three sites spaced 10m apart - edge, near edge, and open water. "MON" in the site name means monitor, and the additional point location names correspond to sampling point names previously used at Denver Water .
 
 
 ```{r echo = FALSE, message = FALSE, out.width= '100%', fig.cap = " '{{value.to.match}}' test"}
@@ -101,7 +101,7 @@ over_thresh <- gee_table %>%
   
 ```
 
-```{r echo = FALSE, results = 'asis', tab.cap = "Mapped exceedances for each point location. NIR:Red values greater than 1 indicate an exceedance and FAI-NDWI output values greater than 0.63 indicate an exceedance."}
+```{r echo = FALSE, results = 'asis', tab.cap = "Mapped exceedances for each point location in {{value.to.match}}. NIR:Red values greater than 1 indicate an exceedance and FAI-NDWI output values greater than 0.63 indicate an exceedance."}
 
 
 # Function to make table fit to page margins
