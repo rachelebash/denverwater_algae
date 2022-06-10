@@ -1,7 +1,6 @@
 ---
 title: |
   ![](Lynker-Logo.png){width=1in}  
-  Geospatial Analysis
 editor_options:
   chunk_output_type: console
 output:
@@ -106,8 +105,9 @@ nir_red_thresh = 1
 ```
 
 
-## Summary
-This report shows maps and time series data of potential harmful algal blooms (HABs) in several of Denver Water’s reservoirs. The reservoirs in this report were selected by Denver Water as key locations where HABs could cause increased water treatment requirements or potential public health concerns.
+## Executive Summary
+
+This report presents maps and time series data of potential algal blooms and harmful algal blooms (HABs) in several of Denver Water’s reservoirs. The reservoirs in this report were identified by Denver Water staff as medium and high priority locations to monitor for increased algal bloom activity. 
 
 ```{r map all res, echo = FALSE, out.width = '100%'}
 # 
@@ -115,9 +115,82 @@ knitr::include_graphics(paste0(drive_dir, "/nir_red/All Waterbodies.jpg"))
 ```
 *Map of all reservoirs in the report.*
 
-HABs may be detected through the use of remote sensing algorithms based on data from the Sentinel 2 Level 1-C Top of Atmosphere satellite. There are two key metrics shown in this report that relate to HAB presence:
+### Key Results
 
-**NIR:Red:** the near infrared (NIR) to red band ratio. The higher NIR:Red values relate to increasing algae biomass on the water surface (Tebbs et al., 2013).The NIR:Red ratio is close to zero for clear water and increases with algae concentrations and values greater than 1 indicates algae presence (Tebbs et al., 2013). NIR:Red is calculated in equation 1 below.
+The following reservoirs show the NIR:Red ratio values indicative of higher algal concentrations at multiple times between `r date1` and `r date2`:
+
+- Bambei-Walker Reservoir
+- Chatfield Reservoir
+- Dunes Reservoir
+- Gross Reservoir
+- Marston Reservoir
+- Platte Canyon Reservoir
+- Ralston Reservoir
+- Tanabe Reservoir
+- Welby Reservoir
+
+
+
+### Disclaimer
+
+These results use a remote-sensing based algorithm to detect conditions that typically coincide with algae growth. These results DO NOT INDICATE the presence of toxic algae or associated constituents. Harmful algal blooms, and the resulting public health impacts, must be verified with laboratory measurements.
+
+
+### Interpreting Results
+
+If a reservoir shows signs of algal blooms, the following message will appear at the beginning of the reservoir section:
+
+---
+
+<span style="color: red;">*POTENTIAL HAB ACTIVITY:*
+the reservoir expressed evidence of algae growth between `r date1` and `r date2` at one or more monitoring sites or throughout the imagery. Recommend verification with testing. </span>
+
+---
+
+If there are no signs of algal blooms in a particular reservoir, the following message will appear at the beginning of the reservoir section.
+
+---
+
+  <span style="color: green;">*NO POTENTIAL HAB ACTIVITY:*
+    According to the NIR:Red remote sensing data, the reservoir *did not* express evidence of algae growth between  `r date1` and `r date2`.</span>
+
+---
+
+If there is some evidence of algal growth, the following message will appear at the beginning of the reservoir section.
+
+---
+
+  <span style="color: orange;">*POSSIBLE HAB ACTIVITY:* The reservoir expressed evidence of algae growth between `r date1` and `r date2` at points that may be influenced by vegetation at the water's edge. Recommend investigating further.</span>
+
+---
+
+
+Detection points were placed in four different areas around each reservoir. Points are labeled edge, near edge, and open water to indicate the distance from shore. This is to help differentiate the satellite results during times of low water or high water. Clusters of points are labeled as MON, followed by a number, indicating which cluster of monitoring points they belong to. In addition to the monitoring points, some reservoirs have sites labeled as Chlorophyll sampling points, where previous in situ sampling of Chlorophyll-a has occurred. Maps of each studied reservoir will contain data between `r date1` and `r date2`. The figure below shows an example of a portion of reservoir with an active algal bloom occurring, according to the NIR:Red ratios. 
+
+```{r example, echo = FALSE, fig.align= 'right', out.width = '100%'}
+
+knitr::include_graphics(paste0(drive_dir, "/images/example.png"))
+
+```
+
+
+All three points in the monitoring cluster (MON-04) are located in various shades of green. According to the legend, the "open water" monitoring point is in a location where NIR:Red ratio threshold has been exceeded 8.9 - 10.9 times within the time period. It is important to note that these remote sensing approaches are subject to important assumptions and limitations, such as waterbody size, mixed land-water pixels, and atmospheric effects (cloud cover, haze). For instance, raster data and the associated color bands located outside of the black waterbody outline may be picking up land pixels. Therefore, using and understanding both the maps and the time series data for each point can help determine whether harmful blooms are taking place in each reservoir. 
+
+Each reservoir's report will also include a timeseries plot of each monitoring cluster. Edge, near edge, and open water NIR:Red ratio timeseries are displayed, along with the threshold exceedance line of 1. If the NIR:Red ratio exceeds 1, then there is evidence of algal blooms occurring. 
+
+```{r timeseries, echo = FALSE, fig.align= 'right', out.width = '100%'}
+
+knitr::include_graphics(paste0(drive_dir, "/images/timeseries.png"))
+
+```
+
+
+### Methods
+
+Algal blooms are formed when blue-green algae (also called cyanobacteria) rapidly multiply, resulting in a dense cyanobacteria concentration, or "bloom". The blooms can become harmful if the blue-green algae produces toxins.This report uses processed output from the European Space Agency’s Sentinel 2 satellites to identify waterbodies experiencing algal growth and potential HABs.  Sentinel 2 is an optical remote sensing platform, meaning it detects reflected radiation from the earth’s surface in and near the visible wavelengths of the electromagnetic spectrum. The imagery analyzed and presented is from the Level 1-C Top of Atmosphere product, over which we apply two key algorithms that relate satellite data to HABs presence:
+  
+  **NIR:Red:** the near infrared (NIR) to red band ratio, which corresponds to algae biomass on the water surface (Tebbs et al., 2013).The NIR:Red ratio is close to zero for clear water and increases with algae concentrations. In this report, we use values greater than 1 to indicate algae presence (Tebbs et al., 2013). NIR:Red is calculated in equation 1 below.
+
 
 
 ```{r nir red eq, echo = FALSE, fig.align= 'right', out.width = '100%'}
@@ -129,7 +202,7 @@ knitr::include_graphics(paste0(drive_dir, "/images/nir_red.png"))
 
 where *R* represents the top of atmosphere reflectance (0–1) for a given band.
 
-**FAI-NDWI:** This algorithm uses the floating algae index (FAI) and the normalized difference water index (NDWI). This algorithm detects potential cyanobacterial blooms (Oyama et al., 2015). First, the FAI differentiates between clear water and algae using a threshold of 0.05. The FAI considers values greater than or equal to 0.05 to be algae, while those below are clear water. Next, the NDWI partitions algae (i.e., pixels with FAI ≥ 0.05) into cyanobacteria and non-cyanobacteria blooms using a threshold of 0.63. Values greater than or equal to this threshold are considered probable cyanobacterial blooms while those below are not. This algorithm is described in equations 2 and 3 below.
+**FAI-NDWI:** This algorithm uses the floating algae index (FAI) and the normalized difference water index (NDWI) to detect potential cyanobacterial blooms (Oyama et al., 2015). First, the FAI differentiates between clear water and algae using a threshold of 0.05. The FAI considers values greater than or equal to 0.05 to be algae, while those below are clear water. Next, the NDWI partitions algae (i.e., pixels with FAI ≥ 0.05) into cyanobacteria and non-cyanobacteria blooms using a threshold of 0.63. Values greater than or equal to this threshold are considered probable cyanobacterial blooms while those below are not. This algorithm is described in equations 2 and 3 below.
 
 ```{r fai eq, echo = FALSE, fig.align= 'right', out.width = '100%'}
 
@@ -144,47 +217,23 @@ knitr::include_graphics(paste0(drive_dir, "/images/ndwi.png"))
 ```
 
 
-We applied the above algorithms to the Sentinel 2 data in Google Earth Engine to evaluate temporal and spatial patterns of algae presence and potential cyanobacterial blooms. With these data, we created a time series of the NIR:Red ratio and the FAI-NDWI cyanobacteria algorithm at each extraction point. In addition to the time series data, we also created maps for each waterbody showing the number of times each pixel exceeded a NIR:Red ratio greater than 1 and met the conditions for cyanobacteria according to the FAI-NDWI algorithm. 
+We applied the above algorithms to the Sentinel 2 data in Google Earth Engine to evaluate temporal and spatial patterns of algae presence and potential cyanobacterial blooms, first removing all pixels obscured by clouds. With these data, we created a time series of the NIR:Red ratio and the FAI-NDWI cyanobacteria algorithm at a selection of points described below. In addition to the time series data, we also created maps for each waterbody showing the number of times each pixel exceeded a NIR:Red ratio greater than 1 and met the conditions for cyanobacteria according to the FAI-NDWI algorithm. 
 
 Dense algae on the water surface can yield taste and odor issues, additionally cyanotoxins may be present in the water with cyanobacteria presence. Therefore, remote sensing is a valuable tool to map algal blooms and potential HABs because the data are continuous, frequent, and freely available. While remote sensing cannot determine toxicity, it offers near real time results and provides drinking water managers a tool to understand the seasonality and presence of algal blooms to assist in decision making. 
 
-### Interpreting Results
-
-Detection points were placed in four different areas around each reservoir. Points are labeled edge, near edge, and open water to indicate the distance from shore. This is to help differentiate the satellite results during times of low water or high water. Clusters of points are labeled as MON, followed by a number, indicating which cluster of monitoring points they belong to. In addition to the monitoring points, some reservoirs have sites labeled as Chlorophyll sampling points, where previous in situ sampling of Chlorophyll-a has occurred. Maps of each studied reservoir will contain data between `r date1` and `r date2`. The figure below shows an example of a portion of reservoir with an active algal bloom occurring, according to the NIR:Red ratios. 
-
-```{r example, echo = FALSE, fig.align= 'right', out.width = '100%'}
-
-knitr::include_graphics(paste0(drive_dir, "/images/example.png"))
-
-```
-
-
-All three points in the monitoring cluster (MON-04) are in blue or dark blue bands. According to the legend, the "open water" monitoring point is in a location where NIR:Red ratio threshold has been exceeded 17-22 times within the time period. It is important to note that these remote sensing approaches are subject to important assumptions and limitations, such as waterbody size, mixed land-water pixels, and atmospheric effects (cloud cover, haze). For instance, raster data and the associated color bands located outside of the black waterbody outline may be picking up land pixels. Therefore, using and understanding both the maps and the time series data for each point can help determine whether harmful blooms are taking place in each reservoir. 
-
-## Key Results
-
-
-
-Table XX below describes results at each reservoir using the algorithms above. This table highlights data from the period XX to YY. The other tables and figures in this report show results for the entire season so far. 
-
-TABLE HERE
+## Reservoirs
 
 ### Antero Reservoir
 
-NIR:Red	
 
-* yes	According to the NIR:Red remote sensing data, the reservoir expressed evidence of algae growth between `r date1` and `r date2`. For each location and pixel type, the NIR:Red ratio exceeded 1 for at least several satellite overpasses.
 
-* no	According to the NIR:Red remote sensing data, the reservoir **did not** express evidence of algae growth between `r date1` and `r date2`. 
-		
-		
-FAI:NDWI	
+---
 
-* yes	The FAI-NDWI algorithm showed potential blue-green algae growth.
+  <span style="color: orange;">*POSSIBLE HAB ACTIVITY:* The reservoir expressed evidence of algae growth between `r date1` and `r date2` at points that may be influenced by vegetation at the water's edge. Recommend investigating further.</span>
 
-* no	The FAI-NDWI algorithm **did not** show potential blue-green algae growth. 
+---
 
-**ADD TEXT HERE**
+
 ```{r include=FALSE}
 out = NULL
 
@@ -197,7 +246,14 @@ out = c(out, knit_expand('waterbody_loop.Rmd'))
 
 ### Bambei-Walker Reservoir
 
-**ADD TEXT HERE**
+---
+
+<span style="color: red;">*POTENTIAL HAB ACTIVITY:*
+the reservoir expressed evidence of algae growth between `r date1` and `r date2` at one or more monitoring sites or throughout the imagery.</span>
+
+---
+
+
 ```{r include=FALSE}
 out1 = NULL
 
@@ -210,7 +266,13 @@ out1 = c(out1, knit_expand('waterbody_loop.Rmd'))
 
 ### Chatfield Reservoir
 
-**ADD TEXT HERE**
+---
+
+<span style="color: red;">*POTENTIAL HAB ACTIVITY:*
+the reservoir expressed evidence of algae growth between `r date1` and `r date2` at one or more monitoring sites or throughout the imagery.</span>
+
+---
+
 ```{r include=FALSE}
 out = NULL
 
@@ -223,7 +285,12 @@ out = c(out, knit_expand('waterbody_loop.Rmd'))
 
 ### Cheesman Reservoir
 
-**ADD TEXT HERE**
+---
+
+  <span style="color: orange;">*POSSIBLE HAB ACTIVITY:* The reservoir expressed evidence of algae growth between `r date1` and `r date2` at points that may be influenced by vegetation at the water's edge. Recommend investigating further.</span>
+
+---
+
 ```{r include=FALSE}
 out = NULL
 
@@ -236,7 +303,14 @@ out = c(out, knit_expand('waterbody_loop.Rmd'))
 
 ### Dillon Reservoir
 
-**ADD TEXT HERE**
+Please note that Dillon Reservoir is on the edge of two satellite overpasses, resulting in raster maps that look a bit disjointed. Also please note that Dillon Reservoir likely had ice on it during part of the study period. The algorithms are not valid over ice, so those results should be discarded. (They will show potential blooms when there are none.)
+
+---
+
+  <span style="color: orange;">*POSSIBLE HAB ACTIVITY:* The reservoir expressed evidence of algae growth between `r date1` and `r date2` at points that may be influenced by vegetation at the water's edge. Recommend investigating further.</span>
+
+---
+
 ```{r include=FALSE}
 out = NULL
 out = NULL
@@ -250,7 +324,13 @@ out = c(out, knit_expand('waterbody_loop.Rmd'))
 
 ### Dunes Reservoir
 
-**ADD TEXT HERE**
+---
+
+<span style="color: red;">*POTENTIAL HAB ACTIVITY:*
+the reservoir expressed evidence of algae growth between `r date1` and `r date2` at one or more monitoring sites or throughout the imagery.</span>
+
+---
+
 ```{r include=FALSE}
 out = NULL
 
@@ -263,7 +343,12 @@ out = c(out, knit_expand('waterbody_loop.Rmd'))
 
 ### Gross Reservoir
 
-**ADD TEXT HERE**
+---
+
+  <span style="color: orange;">*POSSIBLE HAB ACTIVITY:* The reservoir expressed evidence of algae growth between `r date1` and `r date2` at points that may be influenced by vegetation at the water's edge. Recommend investigating further.</span>
+
+---
+
 ```{r include=FALSE}
 out = NULL
 
@@ -276,7 +361,13 @@ out = c(out, knit_expand('waterbody_loop.Rmd'))
 
 ### Marston Reservoir
 
-**ADD TEXT HERE**
+---
+
+<span style="color: red;">*POTENTIAL HAB ACTIVITY:*
+the reservoir expressed evidence of algae growth between `r date1` and `r date2` at one or more monitoring sites or throughout the imagery.</span>
+
+---
+
 ```{r include=FALSE}
 out = NULL
 
@@ -289,7 +380,13 @@ out = c(out, knit_expand('waterbody_loop.Rmd'))
 
 ### Platte Canyon Reservoir
 
-**ADD TEXT HERE**
+---
+
+<span style="color: red;">*POTENTIAL HAB ACTIVITY:*
+the reservoir expressed evidence of algae growth between `r date1` and `r date2` at one or more monitoring sites or throughout the imagery.</span>
+
+---
+
 ```{r include=FALSE}
 out = NULL
 
@@ -302,7 +399,13 @@ out = c(out, knit_expand('waterbody_loop.Rmd'))
 
 ### Ralston Reservoir
 
-**ADD TEXT HERE**
+---
+
+<span style="color: red;">*POTENTIAL HAB ACTIVITY:*
+the reservoir expressed evidence of algae growth between `r date1` and `r date2` at one or more monitoring sites or throughout the imagery.</span>
+
+---
+
 ```{r include=FALSE}
 out = NULL
 
@@ -315,7 +418,12 @@ out = c(out, knit_expand('waterbody_loop.Rmd'))
 
 ### Strontia Springs Reservoir
 
-**ADD TEXT HERE**
+---
+
+  <span style="color: orange;">*POSSIBLE HAB ACTIVITY:* The reservoir expressed evidence of algae growth between `r date1` and `r date2` at points that may be influenced by vegetation at the water's edge. Recommend investigating further.</span>
+
+---
+
 ```{r include=FALSE}
 out = NULL
 
@@ -328,7 +436,13 @@ out = c(out, knit_expand('waterbody_loop.Rmd'))
 
 ### Tanabe Reservoir
 
-**ADD TEXT HERE**
+---
+
+<span style="color: red;">*POTENTIAL HAB ACTIVITY:*
+the reservoir expressed evidence of algae growth between `r date1` and `r date2` at one or more monitoring sites or throughout the imagery.</span>
+
+---
+
 ```{r include=FALSE}
 out = NULL
 
@@ -341,7 +455,13 @@ out = c(out, knit_expand('waterbody_loop.Rmd'))
 
 ### Welby Reservoir
 
-**ADD TEXT HERE**
+---
+
+<span style="color: red;">*POTENTIAL HAB ACTIVITY:*
+the reservoir expressed evidence of algae growth between `r date1` and `r date2` at one or more monitoring sites or throughout the imagery.</span>
+
+---
+
 ```{r include=FALSE}
 out = NULL
 
@@ -354,7 +474,12 @@ out = c(out, knit_expand('waterbody_loop.Rmd'))
 
 ### Williams Fork Reservoir
 
-**ADD TEXT HERE** 
+---
+
+  <span style="color: orange;">*POSSIBLE HAB ACTIVITY:* The reservoir expressed evidence of algae growth between `r date1` and `r date2` at points that may be influenced by vegetation at the water's edge. Recommend investigating further.</span>
+
+---
+
 ```{r include=FALSE}
 out = NULL
 
@@ -364,8 +489,60 @@ out = c(out, knit_expand('waterbody_loop.Rmd'))
 ```
 `r paste(knit(text = out), collapse = '\n')`
 
+## Conclusions
+
+The following table summarizes all **open water** monitoring points in each reservoir between `r date1` and `r date2`. It is important to note that these exceedances are showing the presence of algal blooms, not necessarily **harmful** algal blooms. Additionally, the relationship between chlorophyll-a sampling  NIR:Red ratio shows that, while there is a statistically significant positive relationship (Hur et al., 2022), they do not perfectly align. Water absorbs much of the incoming shortwave radiation emitted by the sun, which causes satellite sensors to report a greater amount of noise relative to the signal returned by low over-water reflectances. Functionally, this means that waterbodies with denser algal blooms return a more reliable signal. The NIR:Red ratio is therefore a less reliable indicator of absolute chlorophyll-a values in waterbodies with low chlorophyll-a concentrations. We also imposed empirically derived thresholds for determining cyanobacteria blooms. Such thresholds may not work for all waterbodies in different geographic regions.
+
+```{r echo = FALSE}
+# Sumary table
+
+# Import processed remote sensing data and chl-a data
+gee <- readRDS(paste0(drive_dir, "sensors_all_aggregated_", date1, "_", date2, ".RDS"))
+
+gee_table <- gee %>% 
+  mutate(cyano = case_when(fai >= fai_thresh & ndwi >= ndwi_thresh ~ 1,
+                           TRUE ~ 0))
+
+over_thresh <- gee_table %>% 
+  filter(pt_loc == "OW") %>%
+  group_by(waterbody) %>% 
+  summarise(nir_red_n_over = sum(nir_red_br >= nir_red_thresh),
+            fai_ndwi_n_over = sum(cyano),
+            n_obs = n()) %>% 
+  ungroup() %>%
+  mutate(nir_red_pct_over = round(nir_red_n_over / n_obs * 100,1),
+         fai_ndwi_pct_over = round(fai_ndwi_n_over / n_obs * 100,1)) %>%
+  select(waterbody, n_obs, nir_red_n_over, nir_red_pct_over, 
+         fai_ndwi_n_over, fai_ndwi_pct_over) %>%
+  mutate(nir_combine = paste0(nir_red_n_over, " (", nir_red_pct_over, "%)"), 
+         fai_combine = paste0(fai_ndwi_n_over, " (", fai_ndwi_pct_over, "%)"),
+         n_obs = as.character(n_obs)) %>%
+  select(waterbody, n_obs, nir_combine, fai_combine) %>%
+  rename("Waterbody" = "waterbody",
+         "Number of observations" = "n_obs",
+         "NIR:Red exceedance count (%)" = "nir_combine",
+         "FAI-NDWI exceedance count (%)" = "fai_combine")
+
+# Function to make table fit to page margins
+fitflextabletopage <- function(ft, pgwidth = 6){
+  ft_out <- ft %>% autofit()
+  ft_out <- width(ft_out, width = dim(ft_out)$widths*pgwidth /(flextable_dim(ft_out)$widths))
+  return(ft_out)
+}
+
+over_thresh %>%
+  flextable() %>%
+  fitflextabletopage
+  
+```
+
+
+
 
 ## References
+
+Hur, N., Jennings, K., McKnight, D. (2022). Spatiotemporal Patterns of Algae and Cyanobacteria in Boulder OSMP Waterbodies, Technical Report.
+
 Oyama, Y., Matsushita, B., & Fukushima, T. (2015). Distinguishing surface cyanobacterial blooms and aquatic macrophytes using Landsat/TM and ETM+ shortwave infrared bands. *Remote Sensing of Environment*, 157, 35–47. https://doi.org/10.1016/j.rse.2014.04.031
 
 Tebbs, E. J., Remedios, J. J., & Harper, D. M. (2013). Remote sensing of chlorophyll-a as a measure of cyanobacterial biomass in Lake Bogoria, a hypertrophic, saline–alkaline, flamingo lake, using Landsat ETM+. *Remote Sensing of Environment*, 135, 92–106.
