@@ -1,5 +1,3 @@
-The following images are maps showing potential harmful algal blooms in {{value.to.match}} from `r date1` to `r date2`.
-
 ```{r include = FALSE}
 # Filter by waterbody
 
@@ -15,35 +13,37 @@ gee_tidy <- gee %>%
 
 
 #list of maps for each waterbody (some are split into two maps N and S)
-nir_paths <- Sys.glob(paste0(drive_dir, "/nir_red/d_", date1, "_", date2, "/*.jpg"))
+nir_paths <- Sys.glob(paste0(drive_dir, "/nir_red/d_", date2minus14, "_", date2, "/*.jpg"))
 nir_paths <- nir_paths[grepl(value.to.match, nir_paths)]
 nir_paths
 
-fai_paths <- Sys.glob(paste0(drive_dir, "/fai_ndwi/d_", date1, "_", date2, "/*.jpg"))
+fai_paths <- Sys.glob(paste0(drive_dir, "/fai_ndwi/d_", date2minus14, "_", date2, "/*.jpg"))
 fai_paths <- fai_paths[grepl(value.to.match, fai_paths)]
 
 ```
 
 
-```{r echo = FALSE, out.width = '100%'}
+At {{value.to.match}}, timeseries data is processed for at least three locations as shown in the figure below. 
 
-knitr::include_graphics(nir_paths)
+
+```{r echo = FALSE}
+bimonthly <- function(x) {
+  x_range <- range(x, na.rm = TRUE)
+  
+  date_range <- c(
+    floor_date(x_range[1], "month"),
+    ceiling_date(x_range[2], "month")
+  )
+  monthly <- seq(date_range[1], date_range[2], by = "1 month")
+  
+  sort(c(monthly, monthly + days(14)))
+}
 
 ```
-*NIR:Red mapped from `r date1` to `r date2` study period. Darker colors indicate higher NIR:Red exceedances. MON in the site name means monitor.*
-  
-  
-```{r echo = FALSE, out.width = '100%'}
-knitr::include_graphics(fai_paths)
-```
-*FAI-NDWI mapped from `r date1` to `r date2` study period. Darker colors indicate higher FAI-NDWI exceedances.*
-  
-  
 
-At {{value.to.match}}, timeseries data is processed for at least four locations as shown in the figure below. At each monitoring point, three different timeseries are collected at three sites spaced 10m apart - edge, near edge, and open water. "MON" in the site name means monitor, and the additional point location names correspond to sampling point names previously used at Denver Water .
+```{r echo = FALSE, message = FALSE, out.width= '100%'}
 
-
-```{r echo = FALSE, message = FALSE, out.width= '100%', fig.cap = " '{{value.to.match}}' test"}
+#Timeseries plots
 
 gee_plot <- gee_tidy %>% 
   filter(waterbody %in% value.to.match) %>%
@@ -51,22 +51,27 @@ gee_plot <- gee_tidy %>%
 
 p <- ggplot(gee_plot, 
        aes(date, nir_red_br, lty = pt_loc)) +
-  geom_line() +
-  geom_hline(yintercept = 1, color = "blue", lty = "dashed") +
-  scale_linetype_discrete(name = "Point Location", 
-                          labels = c("Edge", "Near edge", "Open water")) +
-  theme_cowplot(12) +
-  labs(x = "Date",
-       y = "NIR:Red Ratio", 
-       title = gee_plot$waterbody[1]) +
-  scale_x_date(date_labels = "%m/%d", date_breaks = "1 month") +
   geom_rect(aes(xmin = as.Date(date2, "%Y-%m-%d")-14, xmax = as.Date(date2, "%Y-%m-%d"), 
                 ymin = -Inf, ymax = Inf), 
             fill = "pink",
             alpha = 0.02) +
-  facet_wrap(~sampling_p, scales = "free_y")
+  geom_line() +
+  geom_hline(yintercept = 1, color = "blue", lty = "dashed") +
+  scale_linetype_discrete(name = "Point Location", 
+                          labels = c("Edge (E)", "Near Edge (NE)", "Open Water (OW)")) +
+  theme_cowplot(10) +
+  labs(x = "",
+       y = "NIR:Red Ratio", 
+       title = gee_plot$waterbody[1]) +
+  scale_x_date(date_labels = "%m/%d", date_breaks = "month") + #or change to breaks = bimonthly
+  facet_wrap(~sampling_p, ncol = 2, scales = "free_x") 
 
-ggsave(filename = paste0("C:/projects/dw/git/denverwater_algae/plots/", value.to.match, ".jpg"))
+if (value.to.match == "Chatfield Reservoir") {
+  ggsave(filename = paste0("C:/projects/dw/git/denverwater_algae/plots/", value.to.match, ".jpg"), height = 8)
+} else {
+  ggsave(filename = paste0("C:/projects/dw/git/denverwater_algae/plots/", value.to.match, ".jpg"))
+}
+
 
 plot_paths <- Sys.glob(paste0("C:/projects/dw/git/denverwater_algae/plots/*.jpg"))
 plot_paths <- plot_paths[grepl(value.to.match, plot_paths)]
@@ -78,13 +83,37 @@ knitr::include_graphics(plot_paths)
 
 ```
 
-NIR:Red time series from `r date1` to `r date2` study period. The blue dashed line is at NIR:Red = 1."
+*NIR:Red time series from `r date1` to `r date2`. The blue dashed line is at NIR:Red = 1, the threshold above which algal concentrations could lead to odor or taste concerns. The pink band shows the most recent two weeks, from `r date2minus14` to `r date2`, that are mapped below.*
+
+
+
+The following images are maps showing potential algal blooms in {{value.to.match}} from `r date2minus14` to `r date2`.
+
+
+
+```{r echo = FALSE, out.width = '100%'}
+
+knitr::include_graphics(nir_paths)
+
+```
+*NIR:Red mapped from `r date2minus14` to `r date2` study period. Darker colors indicate higher NIR:Red exceedances.*
+  
+  
+```{r echo = FALSE, out.width = '100%'}
+knitr::include_graphics(fai_paths)
+```
+*FAI-NDWI mapped from `r date2minus14` to `r date2` study period. Darker colors indicate higher FAI-NDWI exceedances. If no  FAI-NDWI appears in the legend or on the map, then no threshold exceedances occurred between `r date2minus14` and `r date2`*
+  
+  
+
+
 
 ```{r include = FALSE}
 # Count above thresholds
 gee_table <- gee_tidy %>% 
   mutate(cyano = case_when(fai >= fai_thresh & ndwi >= ndwi_thresh ~ 1,
-                           TRUE ~ 0))
+                           TRUE ~ 0)) %>%
+  filter(date > date2minus14)
 
 over_thresh <- gee_table %>% 
   group_by(sampling_p, pt_loc) %>% 
@@ -107,7 +136,10 @@ over_thresh <- gee_table %>%
   
 ```
 
-```{r echo = FALSE, results = 'asis', tab.cap = "Mapped exceedances for each point location in {{value.to.match}}. NIR:Red values greater than 1 indicate an exceedance and FAI-NDWI output values greater than 0.63 indicate an exceedance."}
+
+Tabulated exceedances for each point location in {{value.to.match}} between `r date2minus14` and `r date2` are presented below. NIR:Red values greater than 1 indicate an exceedance and pixels with FAI ≥ 0.05 AND NDWI ≥ 0.63 indicate an exceedance.
+
+```{r echo = FALSE, results = 'asis'}
 
 
 # Function to make table fit to page margins
@@ -122,4 +154,6 @@ over_thresh %>%
   fitflextabletopage
 
 ```
+*"Type" refers to the location of the monitoring points along the water's edge (E = edge, NE = near edge, and OW = open water)*
+
 
