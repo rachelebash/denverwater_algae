@@ -2,7 +2,7 @@
 title: |
   ![](Lynker-Logo.png){width=1in} 
   
-  Real-time Remote Sensing Algal Bloom Report: 6/7 - 6/21 
+  Real-time Remote Sensing Algal Bloom Report: 6/21 - 7/5 
 editor_options:
   chunk_output_type: console
 output:
@@ -60,8 +60,8 @@ source("utils/find_google_drive.R") # drive_dir
 #year <- "2020"
 
 date1 <- "2022-04-01"
-date2 <- "2022-06-21"
-date2minus14 <- "2022-06-07"
+date2 <- "2022-07-05"
+date2minus14 <- "2022-06-21"
 
 # Read csv data into R
 df <- read.csv(paste0(drive_dir, "/pts__sentinel2_toa_", date1, "_", date2, ".csv"))
@@ -124,23 +124,24 @@ knitr::include_graphics(paste0(drive_dir, "/nir_red/All Waterbodies.jpg"))
 
 The NIR:Red ratio exceeded 1, indicating presence of higher algal concentrations (which may affect taste and odor of water), at the following reservoirs between `r date2minus14` and `r date2`:
 
-- Antero Reservoir
+- Antero Reservoir*
+- Bambei Walker Reservoir
 - Chatfield Reservoir
 - Cheesman Reservoir
 - Dillon Reservoir
 - Dunes Reservoir
-- Gross Reservoir
-- Marston Reservoir
+- Gross Reservoir*
 - Platte Canyon Reservoir
-- Ralston Reservoir
 - Strontia Springs Reservoir
 - Tanabe Reservoir
 - Welby Reservoir
-- Williams Fork Reservoir
+- Williams Fork Reservoir*
+
+A * indicates reservoirs that had less than three satellite observations between `r date2minus14` and `r date2`.
 
 The FAI-NDWI algorithm met the conditions for cyanobacteria (indicating possible occurance of harmful algal blooms) for the following reservoirs between `r date2minus14` and `r date2`:
 
-- None
+- Welby Reservoir
 
 
 
@@ -179,8 +180,8 @@ If a reservoir's results between `r date2minus14` and `r date2` meets the condit
 
 ---
 
-  <span style="color: red;">*FAI-NDWI threshold exccedance:*
-    Blue-Green Algae growth detected in remote sensing algorithm, this may indicate the occurrence of a harmful algal bloom.</span>
+<span style="color: red;">*FAI-NDWI threshold exccedance:*
+Blue-Green Algae growth detected in remote sensing algorithm, this may indicate the occurrence of a harmful algal bloom.</span>
 
 ---
 
@@ -258,10 +259,10 @@ Dense algae on the water surface can yield taste and odor issues, additionally c
 
 ### Antero Reservoir
 
-
-
 <span style="color: orange;">*NIR:Red threshold exceedance:*
 Algae growth detected in remote sensing algorithm, this may affect taste and odor issues in the water. </span>
+
+Please note however that there are only two instances of satellite observations during this two week period.
 
 <span style="color: green;">*NO meaningful FAI-NDWI threshold exceedance*  </span>
 
@@ -278,7 +279,8 @@ out = c(out, knit_expand('waterbody_loop.Rmd'))
 
 ### Bambei-Walker Reservoir
 
-<span style="color: green;">*NO meaningful NIR:Red threshold exceedance*  </span>
+<span style="color: orange;">*NIR:Red threshold exceedance:*
+Algae growth detected in remote sensing algorithm, this may affect taste and odor issues in the water. </span>
 
 <span style="color: green;">*NO meaningful FAI-NDWI threshold exceedance*  </span>
 
@@ -369,7 +371,7 @@ out = c(out, knit_expand('waterbody_loop.Rmd'))
 <span style="color: orange;">*NIR:Red threshold exceedance:*
 Algae growth detected in remote sensing algorithm, this may affect taste and odor issues in the water. </span>
 
-Please note however that there are only three instances of satellite observations during this two week period.
+Please note however that there are only two instances of satellite observations during this two week period.
 
 <span style="color: green;">*NO meaningful FAI-NDWI threshold exceedance*  </span>
     
@@ -384,8 +386,7 @@ Please note however that there are only three instances of satellite observation
   
 ### Marston Reservoir
   
-<span style="color: orange;">*NIR:Red threshold exceedance:*
-Algae growth detected in remote sensing algorithm, this may affect taste and odor issues in the water. </span>
+<span style="color: green;">*NO meaningful NIR:Red threshold exceedance*  </span>
 
 <span style="color: green;">*NO meaningful FAI-NDWI threshold exceedance*  </span>
     
@@ -418,8 +419,7 @@ Algae growth detected in remote sensing algorithm, this may affect taste and odo
   
 ### Ralston Reservoir
   
-<span style="color: orange;">*NIR:Red threshold exceedance:*
-Algae growth detected in remote sensing algorithm, this may affect taste and odor issues in the water. </span>
+<span style="color: green;">*NO meaningful NIR:Red threshold exceedance*  </span>
 
 <span style="color: green;">*NO meaningful FAI-NDWI threshold exceedance*  </span>
     
@@ -472,7 +472,8 @@ out = c(out, knit_expand('waterbody_loop.Rmd'))
 <span style="color: orange;">*NIR:Red threshold exceedance:*
 Algae growth detected in remote sensing algorithm, this may affect taste and odor issues in the water. </span>
 
-<span style="color: green;">*NO meaningful FAI-NDWI threshold exceedance*  </span>
+<span style="color: red;">*FAI-NDWI threshold exccedance:*
+Blue-Green Algae growth detected in remote sensing algorithm, this may indicate the occurrence of a harmful algal bloom.</span>
 
 ```{r include=FALSE}
 out = NULL
@@ -489,7 +490,7 @@ out = c(out, knit_expand('waterbody_loop.Rmd'))
 <span style="color: orange;">*NIR:Red threshold exceedance:*
 Algae growth detected in remote sensing algorithm, this may affect taste and odor issues in the water. </span>
 
-Please note however that there are only three instances of observations during this two week time period.
+Please note however that there are only two instances of observations during this two week time period.
 
 <span style="color: green;">*NO meaningful FAI-NDWI threshold exceedance*  </span>
     
@@ -564,5 +565,7 @@ Please note however that there are only three instances of observations during t
   
   
 [Report draft 4/1 - 6/7](https://rachel-lynker.github.io/denverwater_algae/index-4.1_6.7.html)
+
+[6/7-6/21 Report](file:///C:/projects/dw/git/denverwater_algae/index-6.7_6.21.html) 
   
   
