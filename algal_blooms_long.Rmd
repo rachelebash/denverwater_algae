@@ -566,6 +566,6 @@ Please note however that there are only two instances of observations during thi
   
 [Report draft 4/1 - 6/7](https://rachel-lynker.github.io/denverwater_algae/index-4.1_6.7.html)
 
-[6/7-6/21 Report](file:///C:/projects/dw/git/denverwater_algae/index-6.7_6.21.html) 
+[6/7-6/21 Report](https://rachel-lynker.github.io/denverwater_algae/index-6.7_6.21.html) 
   
   
