@@ -2,7 +2,7 @@
 title: |
   ![](Lynker-Logo.png){width=1in} 
   
-  Real-time Remote Sensing Algal Bloom Report: 8/16 - 8/30
+  Real-time Remote Sensing Algal Bloom Report: 8/30 - 9/13
 editor_options:
   chunk_output_type: console
 output:
@@ -59,11 +59,17 @@ source("utils/find_google_drive.R") # drive_dir
 #year <- "2020"
 
 date1 <- "2022-04-01"
-date2 <- "2022-08-30"
-date2minus14 <- "2022-08-16"
+date2 <- "2022-09-13"
+date2minus14 <- "2022-08-30"
 
 # Read csv data into R
-df <- read.csv(paste0(drive_dir, "/pts__sentinel2_toa_", date1, "_", date2, ".csv"))
+df <- read.csv(paste0(drive_dir, "/pts__sentinel2_toa_", date1, "_", date2, "_water_mask.csv"))
+
+# Define thresholds
+fai_thresh = 0.05
+ndwi_thresh = 0.63
+nir_red_thresh = 1
+mndwi_thresh = 0.08
 
 # Add sensor and date columns
 df <- df %>% 
@@ -74,6 +80,13 @@ df <- df %>%
          date = str_sub(system.index, 13, 20) %>% as.Date(format = "%Y%m%d"),
          waterbody = paste0(str_to_title(reservoir_), " Reservoir")) %>% 
   select(-.geo)
+
+# apply water mask mndwi threshold
+# df <- df %>%
+#   mutate(water_nir_red = case_when(mndwi >= mndwi_thresh ~ nir_red_br,
+#                                    TRUE ~ 0)) %>%
+#   # make values NA if they were 0
+#   mutate_at(c('water_nir_red'), ~na_if(., 0))
 
 # Remove system.index and extra QA columns
 df <- df %>% 
@@ -99,11 +112,6 @@ looplist <- read.csv(paste0(drive_dir, "/rmarkdown/waterbody_list.csv")) %>%
 
 value.to.match <- looplist[1,1]
 
-# Define thresholds
-fai_thresh = 0.05
-ndwi_thresh = 0.63
-nir_red_thresh = 1
-
 ```
 
 
@@ -125,10 +133,9 @@ The NIR:Red ratio exceeded 1, indicating presence of higher algal concentrations
 
 - Bambei Walker Reservoir +
 - Chatfield Reservoir
-- Cheesman Reservoir
 - Dillon Reservoir
 - Dunes Reservoir +
-- Martson Reservoir
+- Gross Reservoir
 - Welby Reservoir +
 - Williams Fork
 
@@ -139,7 +146,7 @@ A plus sign (+) indicates reservoirs that likely have low water levels, hinderin
 The FAI-NDWI algorithm met the conditions for cyanobacteria (indicating possible occurance of harmful algal blooms) in at least one area for the following reservoirs between `r date2minus14` and `r date2`:
 
 
-- Dillon Reservoir
+- None
 
 
 #### Disclaimer
@@ -149,7 +156,7 @@ These results use a remote-sensing based algorithm to detect conditions that typ
 
 ### Interpreting Results
 
-The two algorithms employed in the analysis tell us two different things. The NIR:Red ratio increases as with algal concentrations. Dense concentrations of algae on the water surface can yield taste and odor issues. The FAI and NDWI algorithms together can evaluate cyanobacteria presence, which can potentially indicate cyanotoxins that create harmful algal blooms. 
+The two algorithms employed in the analysis tell us two different things. The NIR:Red ratio increases as algal concentrations increases. Dense concentrations of algae on the water surface can yield taste and odor issues. The FAI and NDWI algorithms together can evaluate cyanobacteria presence, which can potentially indicate cyanotoxins that create harmful algal blooms. 
 
 If a reservoir's results between `r date2minus14` and `r date2` shows the NIR:Red ratio exceeding its threshold in meaningful ways, the following message will appear at the beginning of the reservoir section:
 
@@ -310,8 +317,7 @@ out = c(out, knit_expand('waterbody_loop.Rmd'))
 
 ### Cheesman Reservoir
 
-<span style="color: orange;">*NIR:Red threshold exceedance:*
-Algae growth detected in remote sensing algorithm, this may affect taste and odor issues in the water. </span>
+<span style="color: green;">*NO meaningful NIR:Red threshold exceedance*  </span>
 
 <span style="color: green;">*NO meaningful FAI-NDWI threshold exceedance*  </span>
     
@@ -332,8 +338,7 @@ Algae growth detected in remote sensing algorithm, this may affect taste and odo
 <span style="color: orange;">*NIR:Red threshold exceedance:*
 Algae growth detected in remote sensing algorithm, this may affect taste and odor issues in the water. </span>
 
-<span style="color: red;">*FAI-NDWI threshold exccedance:*
-Blue-Green Algae growth detected in remote sensing algorithm, this may indicate the occurrence of a harmful algal bloom.</span>
+<span style="color: green;">*NO meaningful FAI-NDWI threshold exceedance*  </span>
 
 ```{r include=FALSE}
 out = NULL
@@ -365,10 +370,11 @@ out = c(out, knit_expand('waterbody_loop.Rmd'))
 
 ### Gross Reservoir
 
-<span style="color: green;">*NO meaningful NIR:Red threshold exceedance*  </span>
+<span style="color: orange;">*NIR:Red threshold exceedance:*
+Algae growth detected in remote sensing algorithm, this may affect taste and odor issues in the water. </span>
 
 
-Please note however that there are only three instances of satellite observations during this two week period.
+Please note however that there are only two instances of satellite observations during this two week period.
 
 <span style="color: green;">*NO meaningful FAI-NDWI threshold exceedance*  </span>
     
@@ -383,8 +389,9 @@ Please note however that there are only three instances of satellite observation
   
 ### Marston Reservoir
   
-<span style="color: orange;">*NIR:Red threshold exceedance:*
-Algae growth detected in remote sensing algorithm, this may affect taste and odor issues in the water. </span>
+The first map below depicts the average value of the NIR:Red ratio at each colored pixel. This is different than the other maps, which show the total number of times the pixel exceeded the established threshold.
+
+<span style="color: green;">*NO meaningful NIR:Red threshold exceedance*  </span>
 
 <span style="color: green;">*NO meaningful FAI-NDWI threshold exceedance*  </span>
     
@@ -499,7 +506,7 @@ Please note however that there are only three instances of observations during t
   
 ## Conclusions
   
-  The following table summarizes all **open water** monitoring points in each reservoir between `r date1` and `r date2`. It is important to note that these exceedances are showing the presence of algal growth, not necessarily **harmful** algal blooms. Additionally, the relationship between chlorophyll-a sampling  NIR:Red ratio shows that, while there is a statistically significant positive relationship (Hur et al., 2022), they do not perfectly align. Water absorbs much of the incoming shortwave radiation emitted by the sun, which causes satellite sensors to report a greater amount of noise relative to the signal returned by low over-water reflectances. Functionally, this means that waterbodies with denser algal blooms return a more reliable signal. The NIR:Red ratio is therefore a less reliable indicator of absolute chlorophyll-a values in waterbodies with low chlorophyll-a concentrations. We also imposed empirically derived thresholds for determining cyanobacteria blooms. Such thresholds may not work for all waterbodies in different geographic regions.
+  The following table summarizes all **open water** monitoring points in each reservoir between `r date1` and `r date2`. It is important to note that these exceedances are showing the presence of algal growth, not necessarily *harmful* algal blooms. Additionally, the relationship between chlorophyll-a sampling  NIR:Red ratio shows that, while there is a statistically significant positive relationship (Hur et al., 2022), they do not perfectly align. Water absorbs much of the incoming shortwave radiation emitted by the sun, which causes satellite sensors to report a greater amount of noise relative to the signal returned by low over-water reflectances. Functionally, this means that waterbodies with denser algal blooms return a more reliable signal. The NIR:Red ratio is therefore a less reliable indicator of absolute chlorophyll-a values in waterbodies with low chlorophyll-a concentrations. We also imposed empirically derived thresholds for determining cyanobacteria blooms. Such thresholds may not work for all waterbodies in different geographic regions.
   
 ```{r echo = FALSE}
   # Summary table
@@ -569,5 +576,7 @@ Please note however that there are only three instances of observations during t
 [7/19-8/02 Report](https://rachel-lynker.github.io/denverwater_algae/index-7.19_8.2.html)
 
 [8/2-8/16 Report](https://rachel-lynker.github.io/denverwater_algae/index-8.2_8.16.html)
+
+[8/16-8/30 Report](https://rachel-lynker.github.io/denverwater_algae/index-8.16_8.30.html)
   
   
