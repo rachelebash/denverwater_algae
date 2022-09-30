@@ -2,7 +2,7 @@
 title: |
   ![](Lynker-Logo.png){width=1in} 
   
-  Real-time Remote Sensing Algal Bloom Report: 8/30 - 9/13
+  Real-time Remote Sensing Algal Bloom Report: 9/13 - 9/26
 editor_options:
   chunk_output_type: console
 output:
@@ -59,11 +59,11 @@ source("utils/find_google_drive.R") # drive_dir
 #year <- "2020"
 
 date1 <- "2022-04-01"
-date2 <- "2022-09-13"
-date2minus14 <- "2022-08-30"
+date2 <- "2022-09-26"
+date2minus14 <- "2022-09-13"
 
 # Read csv data into R
-df <- read.csv(paste0(drive_dir, "/pts__sentinel2_toa_", date1, "_", date2, "_water_mask.csv"))
+df <- read.csv(paste0(drive_dir, "/pts__sentinel2_toa_", date1, "_", date2, ".csv"))
 
 # Define thresholds
 fai_thresh = 0.05
@@ -135,9 +135,8 @@ The NIR:Red ratio exceeded 1, indicating presence of higher algal concentrations
 - Chatfield Reservoir
 - Dillon Reservoir
 - Dunes Reservoir +
-- Gross Reservoir
+- Marston Reservoir 
 - Welby Reservoir +
-- Williams Fork
 
 An asterisk (*) indicates reservoirs that had less than three satellite observations between `r date2minus14` and `r date2`.
 
@@ -370,8 +369,7 @@ out = c(out, knit_expand('waterbody_loop.Rmd'))
 
 ### Gross Reservoir
 
-<span style="color: orange;">*NIR:Red threshold exceedance:*
-Algae growth detected in remote sensing algorithm, this may affect taste and odor issues in the water. </span>
+<span style="color: green;">*NO meaningful NIR:Red threshold exceedance*  </span>
 
 
 Please note however that there are only two instances of satellite observations during this two week period.
@@ -391,7 +389,8 @@ Please note however that there are only two instances of satellite observations 
   
 The first map below depicts the average value of the NIR:Red ratio at each colored pixel. This is different than the other maps, which show the total number of times the pixel exceeded the established threshold.
 
-<span style="color: green;">*NO meaningful NIR:Red threshold exceedance*  </span>
+<span style="color: orange;">*NIR:Red threshold exceedance:*
+Algae growth detected in remote sensing algorithm, this may affect taste and odor issues in the water. </span>
 
 <span style="color: green;">*NO meaningful FAI-NDWI threshold exceedance*  </span>
     
@@ -488,10 +487,9 @@ out = c(out, knit_expand('waterbody_loop.Rmd'))
 
 ### Williams Fork Reservoir
 
-<span style="color: orange;">*NIR:Red threshold exceedance:*
-Algae growth detected in remote sensing algorithm, this may affect taste and odor issues in the water. </span>
+<span style="color: green;">*NO meaningful NIR:Red threshold exceedance*  </span>
 
-Please note however that there are only three instances of observations during this two week time period.
+Please note however that there are only two instances of observations during this two week time period.
 
 <span style="color: green;">*NO meaningful FAI-NDWI threshold exceedance*  </span>
     
@@ -578,5 +576,7 @@ Please note however that there are only three instances of observations during t
 [8/2-8/16 Report](https://rachel-lynker.github.io/denverwater_algae/index-8.2_8.16.html)
 
 [8/16-8/30 Report](https://rachel-lynker.github.io/denverwater_algae/index-8.16_8.30.html)
+
+[8/30-9/13 Report](https://rachel-lynker.github.io/denverwater_algae/index-8.30_9.13.html)
   
   
