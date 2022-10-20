@@ -2,7 +2,7 @@
 title: |
   ![](Lynker-Logo.png){width=1in} 
   
-  Real-time Remote Sensing Algal Bloom Report: 9/13 - 9/26
+  Real-time Remote Sensing Algal Bloom Report: 9/27-10/14
 editor_options:
   chunk_output_type: console
 output:
@@ -59,8 +59,8 @@ source("utils/find_google_drive.R") # drive_dir
 #year <- "2020"
 
 date1 <- "2022-04-01"
-date2 <- "2022-09-26"
-date2minus14 <- "2022-09-13"
+date2 <- "2022-10-14"
+date2minus14 <- "2022-09-27"
 
 # Read csv data into R
 df <- read.csv(paste0(drive_dir, "/pts__sentinel2_toa_", date1, "_", date2, ".csv"))
@@ -264,7 +264,7 @@ Dense algae on the water surface can yield taste and odor issues, additionally c
 
 <span style="color: green;">*NO meaningful NIR:Red threshold exceedance*  </span>
 
-Please note however that there are only three instances of satellite observations during this two week period.
+Please note however that there are only four instances of satellite observations during this two week period.
 
 <span style="color: green;">*NO meaningful FAI-NDWI threshold exceedance*  </span>
 
@@ -489,7 +489,7 @@ out = c(out, knit_expand('waterbody_loop.Rmd'))
 
 <span style="color: green;">*NO meaningful NIR:Red threshold exceedance*  </span>
 
-Please note however that there are only two instances of observations during this two week time period.
+Please note however that there are only four instances of observations during this two week time period.
 
 <span style="color: green;">*NO meaningful FAI-NDWI threshold exceedance*  </span>
     
@@ -578,5 +578,7 @@ Please note however that there are only two instances of observations during thi
 [8/16-8/30 Report](https://rachel-lynker.github.io/denverwater_algae/index-8.16_8.30.html)
 
 [8/30-9/13 Report](https://rachel-lynker.github.io/denverwater_algae/index-8.30_9.13.html)
+
+[9/13-9/26 Report](https://rachel-lynker.github.io/denverwater_algae/index-9.13_9.26.html)
   
   
